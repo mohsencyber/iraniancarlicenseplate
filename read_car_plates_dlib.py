@@ -4,9 +4,9 @@ import glob
 from PIL import Image
 import dlib
 
-# In this example we are going to train a face detector based on the small
-# faces dataset in the examples/faces directory.  This means you need to supply
-# the path to this faces folder as a command line argument so we will know
+# In this example we are going to train a plate  detector based on the small
+# plate dataset in the car_plates/ directory.  This means you need to supply
+# the path to this plates folder as a command line argument so we will know
 # where it is.
 if len(sys.argv) != 2:
     print(
@@ -43,11 +43,11 @@ print("Testing accuracy: {}".format(
 
 detector = dlib.simple_object_detector("detector.svm")
 
-# We can look at the HOG filter we learned.  It should look like a face.  Neat!
+# We can look at the HOG filter we learned.  It should look like a plate.  Neat!
 win_det = dlib.image_window()
 win_det.set_image(detector)
 
-print("Showing detections on the images in the faces folder...")
+print("Showing detections on the images in the plates folder...")
 win = dlib.image_window()
 for f in glob.glob(os.path.join(plate_folder, "*.jpg")):
     print("Processing file: {}".format(f))
@@ -55,7 +55,7 @@ for f in glob.glob(os.path.join(plate_folder, "*.jpg")):
     p_image=Image.fromarray(img,'RGB')
     #p_image.show()
     dets = detector(img)
-    print("Number of faces detected: {}".format(len(dets)))
+    print("Number of plate detected: {}".format(len(dets)))
     for k, d in enumerate(dets):
         print("Detection {}: Left: {} Top: {} Right: {} Bottom: {}".format(
             k, d.left(), d.top(), d.right(), d.bottom()))
@@ -88,18 +88,15 @@ images = [dlib.load_rgb_image(plate_folder + '/car08.jpg'),
           dlib.load_rgb_image(plate_folder + '/car07.jpg')]
 # Then for each image you make a list of rectangles which give the pixel
 # locations of the edges of the boxes.
-boxes_img1 = ([dlib.rectangle(left=329, top=78, right=437, bottom=186),
-               dlib.rectangle(left=224, top=95, right=314, bottom=185),
-               dlib.rectangle(left=125, top=65, right=214, bottom=155)])
-boxes_img2 = ([dlib.rectangle(left=154, top=46, right=228, bottom=121),
-               dlib.rectangle(left=266, top=280, right=328, bottom=342)])
+boxes_img1 = ([dlib.rectangle(left=87, top=87, right=159, bottom=102)])
+boxes_img2 = ([dlib.rectangle(left=13, top=70, right=255, bottom=103)])
 # And then you aggregate those lists of boxes into one big list and then call
 # train_simple_object_detector().
 boxes = [boxes_img1, boxes_img2]
 
 detector2 = dlib.train_simple_object_detector(images, boxes, options)
 # We could save this detector to disk by uncommenting the following.
-#detector2.save('detector2.svm')
+detector2.save('detector2.svm')
 
 # Now let's look at its HOG filter!
 win_det.set_image(detector2)

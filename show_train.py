@@ -54,12 +54,4 @@ imagefinal.rectangle(((219,675),(219+122,675+27)),outline="black")
 
 img.show()
 
-img = Image.open("car_plates/2008_001009.jpg")
-
-imagefinal=ImageDraw.Draw(img)
-imagefinal.rectangle(((145,79),(145+76,79+76)),outline="black")
-imagefinal.rectangle(((125,214),(125+90,214+91)),outline="black")
-
-img.show()
-
 

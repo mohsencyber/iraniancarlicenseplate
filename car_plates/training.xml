@@ -1,0 +1,32 @@
+<?xml version='1.0' encoding='ISO-8859-1'?>
+<?xml-stylesheet type='text/xsl' href='image_metadata_stylesheet.xsl'?>
+<dataset>
+<name>Training faces</name>
+<comment>These are images from the PASCAL VOC 2011 dataset.</comment>
+<images>
+  <image file='car01.jpg'>
+    <box top='363' left='318' width='195' height='37'/>
+  </image>
+  <image file='car04.jpg'>
+    <box top='195' left='187' width='130' height='35'/>
+  </image>
+  <image file='car05.jpg'>
+    <box top='881' left='368' width='210' height='31'/>
+    <box top='934' left='1771' width='126' height='21'/>
+    <box top='980' left='1409' width='76' height='12'/>
+  </image>
+  <image file='car11.jpg'>
+    <box top='625' left='820' width='102' height='20'/>
+    <box top='675' left='219' width='122' height='27'/>
+  </image>
+  <image file='car12.jpg'>
+    <box top='99' left='72' width='128' height='23'/>
+  </image>
+  <image file='car09.jpg'>
+    <box top='728' left='945' width='245' height='80'/>
+  </image>
+  <image file='car19.jpg'>
+    <box top='215' left='695' width='103' height='25'/>
+  </image>
+</images>
+</dataset>

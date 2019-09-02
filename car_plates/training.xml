@@ -5,28 +5,32 @@
 <comment>These are images from the PASCAL VOC 2011 dataset.</comment>
 <images>
   <image file='car01.jpg'>
-    <box top='363' left='318' width='195' height='37'/>
+    <box top='363' left='297' width='205' height='37'/>
   </image>
   <image file='car04.jpg'>
-    <box top='195' left='187' width='130' height='35'/>
+    <box top='195' left='170' width='145' height='35'/>
   </image>
   <image file='car05.jpg'>
-    <box top='881' left='368' width='210' height='31'/>
-    <box top='934' left='1771' width='126' height='21'/>
-    <box top='980' left='1409' width='76' height='12'/>
+    <box top='881' left='347' width='225' height='31'/>
+    <box top='934' left='1759' width='135' height='21'/>
+    <box top='980' left='1400' width='95' height='12'/>
   </image>
   <image file='car11.jpg'>
-    <box top='625' left='820' width='102' height='20'/>
-    <box top='675' left='219' width='122' height='27'/>
+    <box top='625' left='810' width='115' height='20'/>
+    <box top='675' left='206' width='135' height='27'/>
   </image>
   <image file='car12.jpg'>
-    <box top='99' left='72' width='128' height='23'/>
+    <box top='99' left='63' width='135' height='23'/>
   </image>
   <image file='car09.jpg'>
-    <box top='728' left='945' width='245' height='80'/>
+    <box top='727' left='923' width='255' height='80'/>
   </image>
   <image file='car19.jpg'>
-    <box top='215' left='695' width='103' height='25'/>
+    <box top='215' left='685' width='115' height='25'/>
+  </image>
+  <image file='car17.jpg' >
+    <box top='405' left='993' width='155' height='30' />
+    <box top='390' left='40' width='155' height='35' />
   </image>
 </images>
 </dataset>

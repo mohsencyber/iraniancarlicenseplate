@@ -2,7 +2,7 @@ import os
 import sys
 import glob
 from math import ceil
-from PIL import Image , ImageFilter
+from PIL import Image , ImageFilter , ImageDraw
 import dlib
 import numpy as np
 from pandas import DataFrame
@@ -19,7 +19,7 @@ def splitcharacter(imagein):
     print(img_arr2)
     img1=Image.fromarray(imagein,'RGB')
     img1=img1.filter(ImageFilter.CONTOUR)
-    img1.show()
+    #img1.show()
     img1.save('tmp.jpg')
     img2=dlib.load_rgb_image('tmp.jpg')
     #img2=np.asarray(img1,dtype='int32')
@@ -47,6 +47,10 @@ def splitcharacter(imagein):
     xmargin=ceil(float(lendiff)/2)
     ymargin=ceil(float(hdiff*9)/2)
     print (xmargin,ymargin)
+    imagefinal=ImageDraw.Draw(img1)
+    for point in centroids:
+        imagefinal.rectangle(((point[0]-xmargin,point[1]-ymargin),(point[0]+xmargin,point[1]+ymargin)),outline="black")
+    img1.show()    
     for point in centroids:
         print(int(point[0]-xmargin),int(point[0]+xmargin),int(point[1]-ymargin),int(point[1]+ymargin))
         p11=int(point[1]-ymargin)

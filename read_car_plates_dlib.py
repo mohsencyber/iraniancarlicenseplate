@@ -18,7 +18,8 @@ def splitcharacter(imagein):
     print(" ")
     print(img_arr2)
     img1=Image.fromarray(imagein,'RGB')
-    img1=img1.filter(ImageFilter.CONTOUR)
+    #img1=img1.filter(ImageFilter.CONTOUR)
+    img1=img1.convert('1')
     #img1.show()
     img1.save('tmp.jpg')
     img2=dlib.load_rgb_image('tmp.jpg')
@@ -30,7 +31,7 @@ def splitcharacter(imagein):
     Data= {'x':[],'y':[]}
     for y in range(len(img_arr)):
         for x in range(len(img_arr[0])):
-            if img_arr[y][x]<=220:
+            if img_arr[y][x]<=8:
                 Data['x'].append(x)
                 Data['y'].append(y)
 

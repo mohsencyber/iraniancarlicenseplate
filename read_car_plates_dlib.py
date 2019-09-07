@@ -4,43 +4,66 @@ import glob
 from math import ceil
 from PIL import Image , ImageFilter , ImageDraw
 import dlib
+import time
 import numpy as np
 from pandas import DataFrame
 from sklearn.cluster import KMeans
+from findplate import findplate
 
 # In this example we are going to train a plate  detector based on the small
 # plate dataset in the car_plates/ directory.  This means you need to supply
 # the path to this plates folder as a command line argument so we will know
 # where it is.
-def splitcharacter(imagein):
+def splitcharacter(imagein,find_plate):
     img_arr2=dlib.as_grayscale(imagein)
-    print (type(img_arr2))
-    print(" ")
-    print(img_arr2)
-    img1=Image.fromarray(imagein,'RGB')
+    #img_arr2=dlib.threshold_image(img_arr2)
+    plate_str=find_plate.get_platestr_from_image(img_arr2)
+    print(plate_str)
+    #img1=Image.fromarray(img_arr2,'L')
+    rects = []
+    dlib.find_candidate_object_locations(img_arr2, rects, min_size=100)
+    print(len(rects))
+    mywin = dlib.image_window()
+    for rect in rects:
+        #img2=img1
+        #imagefinal=ImageDraw.Draw(img2)
+        #imagefinal.rectangle(((rect.left(),rect.top()),(rect.right(),rect.bottom())),outline="black")
+        #img2.show()
+        mywin.clear_overlay()
+        mywin.set_image(img_arr2)
+        mywin.add_overlay(rect)
+        #dlib.hit_enter_to_continue()
+        time.sleep(0.1)
+        #print(rect)
+    #print (type(img_arr2))
+    #print(" ")
+    #print(img_arr2)
+    img1=Image.fromarray(img_arr2,'L')
     #img1=img1.filter(ImageFilter.CONTOUR)
-    img1=img1.convert('1')
+    #img1=img1.convert('1')
     #img1.show()
     img1.save('tmp.jpg')
     img2=dlib.load_rgb_image('tmp.jpg')
     #img2=np.asarray(img1,dtype='int32')
     img_arr=dlib.as_grayscale(img2)
-    print (type(img2))
-    print(" ")
+    #img_arr=dlib.threshold_image(img_arr)
+    #print (type(img2))
+    #print(" ")
     print(img_arr)
     Data= {'x':[],'y':[]}
     for y in range(len(img_arr)):
         for x in range(len(img_arr[0])):
-            if img_arr[y][x]<=8:
+            if img_arr[y][x]<128:
                 Data['x'].append(x)
                 Data['y'].append(y)
 
     df = DataFrame(Data,columns=['x','y'])
-    cluster=9
+    cluster=8
     kmeans = KMeans(n_clusters=cluster).fit(df)
     centroids=kmeans.cluster_centers_
-    #print(len(centroids),centroids[2][0],centroids[2][1])
 
+    #print(len(centroids),centroids)
+    
     centroids=sorted(centroids,key = lambda x: x[0])
     #centroids.reverse();
     print(centroids)
@@ -63,6 +86,8 @@ def splitcharacter(imagein):
         if p21 < 0:
             p21=0
         imageofnumber.append(imagein[p11:p12,p21:p22])
+
+
     return  imageofnumber
 
 if __name__ == "__main__":
@@ -75,7 +100,7 @@ if __name__ == "__main__":
         exit()
     plate_folder = sys.argv[1]
     
-    
+    find_plate = findplate()
     options = dlib.simple_object_detector_training_options()
     
     options.add_left_right_image_flips = True
@@ -139,10 +164,10 @@ if __name__ == "__main__":
                 left = 0
             imgnew=img[top:bottom,left:right]
             ####---------------Find Character---------------
-            charsplited=splitcharacter(imgnew)
+            charsplited=splitcharacter(imgnew,find_plate)
             for isp in charsplited:
                 win.set_image(isp)
-                dlib.hit_enter_to_continue()
+                #dlib.hit_enter_to_continue()
             ####--------------------------------------------
             #myimg = p_image.crop((left,top,right,bottom))
             #myimg.show()

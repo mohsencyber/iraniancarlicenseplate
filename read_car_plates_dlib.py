@@ -9,6 +9,7 @@ import numpy as np
 from pandas import DataFrame
 from sklearn.cluster import KMeans
 from findplate import findplate
+from skimage.filters import sobel
 
 # In this example we are going to train a plate  detector based on the small
 # plate dataset in the car_plates/ directory.  This means you need to supply
@@ -16,12 +17,12 @@ from findplate import findplate
 # where it is.
 def splitcharacter(imagein,find_plate):
     img_arr2=dlib.as_grayscale(imagein)
-    #img_arr2=dlib.threshold_image(img_arr2)
-    plate_str=find_plate.get_platestr_from_image(img_arr2)
-    print(plate_str)
+    img_arr2=dlib.threshold_image(img_arr2)
+    #plate_str=find_plate.get_platestr_from_image(img_arr2)
+    #print(plate_str)
     #img1=Image.fromarray(img_arr2,'L')
-    rects = []
-    dlib.find_candidate_object_locations(img_arr2, rects, min_size=100)
+    '''rects = []
+    dlib.find_candidate_object_locations(img_arr2, rects, min_size=50)
     print(len(rects))
     mywin = dlib.image_window()
     for rect in rects:
@@ -35,35 +36,40 @@ def splitcharacter(imagein,find_plate):
         #dlib.hit_enter_to_continue()
         time.sleep(0.1)
         #print(rect)
+        '''
     #print (type(img_arr2))
     #print(" ")
     #print(img_arr2)
+    #img_arr2=sobel(img_arr2)
     img1=Image.fromarray(img_arr2,'L')
     #img1=img1.filter(ImageFilter.CONTOUR)
     #img1=img1.convert('1')
     #img1.show()
     img1.save('tmp.jpg')
     img2=dlib.load_rgb_image('tmp.jpg')
+    ximg,yimg=img1.size
     #img2=np.asarray(img1,dtype='int32')
     img_arr=dlib.as_grayscale(img2)
-    #img_arr=dlib.threshold_image(img_arr)
+    img_arr=dlib.threshold_image(img_arr)
     #print (type(img2))
     #print(" ")
-    print(img_arr)
+    #print(img_arr)
     Data= {'x':[],'y':[]}
     for y in range(len(img_arr)):
         for x in range(len(img_arr[0])):
-            if img_arr[y][x]<128:
+            if img_arr[y][x]>128:
                 Data['x'].append(x)
                 Data['y'].append(y)
 
     df = DataFrame(Data,columns=['x','y'])
-    cluster=8
-    kmeans = KMeans(n_clusters=cluster).fit(df)
+    cluster=5
+    try:
+        kmeans = KMeans(n_clusters=cluster).fit(df)
+    except Exception as e:
+        return Null
     centroids=kmeans.cluster_centers_
 
     #print(len(centroids),centroids)
-    
     centroids=sorted(centroids,key = lambda x: x[0])
     #centroids.reverse();
     print(centroids)
@@ -73,7 +79,15 @@ def splitcharacter(imagein,find_plate):
     print (xmargin,ymargin)
     imagefinal=ImageDraw.Draw(img1)
     for point in centroids:
-        imagefinal.rectangle(((point[0]-xmargin,point[1]-ymargin),(point[0]+xmargin,point[1]+ymargin)),outline="black")
+        imagefinal.ellipse((point[0]-3,point[1]-2,point[0]+3,point[1]+2),fill=55)
+        #imagefinal.rectangle(((point[0]-xmargin,point[1]-ymargin),(point[0]+xmargin,point[1]+ymargin)),outline="black")
+    #xwalk=int(ximg-5)/10
+    #ywalk=int(yimg-4)
+    #xx=xwalk
+    
+    #while( xx < ximg-xwalk ):
+    #    imagefinal.rectangle(((xx,2),(xx+xwalk,2+ywalk)),outline="black")
+    #    xx=xx+xwalk
     img1.show()    
     for point in centroids:
         print(int(point[0]-xmargin),int(point[0]+xmargin),int(point[1]-ymargin),int(point[1]+ymargin))

@@ -48,7 +48,11 @@ def splitcharacter(imagein,find_plate):
     img1.save('tmp.jpg')
     img2=dlib.load_rgb_image('tmp.jpg')
     ximg,yimg=img1.size
+    print(img1.size,img2.shape)
+    img2=img2[int(yimg/3):2*int(yimg/3),0:ximg]
     #img2=np.asarray(img1,dtype='int32')
+    #img22=Image.fromarray(img2)
+    #img22.show()
     img_arr=dlib.as_grayscale(img2)
     img_arr=dlib.threshold_image(img_arr)
     #print (type(img2))
@@ -62,7 +66,7 @@ def splitcharacter(imagein,find_plate):
                 Data['y'].append(y)
 
     df = DataFrame(Data,columns=['x','y'])
-    cluster=5
+    cluster=9
     try:
         kmeans = KMeans(n_clusters=cluster).fit(df)
     except Exception as e:
@@ -74,12 +78,12 @@ def splitcharacter(imagein,find_plate):
     #centroids.reverse();
     print(centroids)
     imageofnumber=[]
-    xmargin=ceil(float(lendiff)/2)
+    xmargin=ceil(float(lendiff)/8)
     ymargin=ceil(float(hdiff*9)/2)
-    print (xmargin,ymargin)
+    print ("==>",xmargin,ymargin)
     imagefinal=ImageDraw.Draw(img1)
     for point in centroids:
-        imagefinal.ellipse((point[0]-3,point[1]-2,point[0]+3,point[1]+2),fill=55)
+        imagefinal.ellipse((point[0]-3,point[1]+int(yimg/3)-2,point[0]+3,point[1]+int(yimg/3)+2),fill=55)
         #imagefinal.rectangle(((point[0]-xmargin,point[1]-ymargin),(point[0]+xmargin,point[1]+ymargin)),outline="black")
     #xwalk=int(ximg-5)/10
     #ywalk=int(yimg-4)
@@ -88,18 +92,26 @@ def splitcharacter(imagein,find_plate):
     #while( xx < ximg-xwalk ):
     #    imagefinal.rectangle(((xx,2),(xx+xwalk,2+ywalk)),outline="black")
     #    xx=xx+xwalk
-    img1.show()    
+    img1.show() 
+    firstx=0
+    xstep=0
     for point in centroids:
-        print(int(point[0]-xmargin),int(point[0]+xmargin),int(point[1]-ymargin),int(point[1]+ymargin))
-        p11=int(point[1]-ymargin)
-        p12=int(point[1]+ymargin)
-        p21=int(point[0]-xmargin)
-        p22=int(point[0]+xmargin)
-        if p11 < 0 :
-            p11=0
-        if p21 < 0:
-            p21=0
-        imageofnumber.append(imagein[p11:p12,p21:p22])
+        if firstx==0:
+            firstx=point[0]
+        else:
+            print(int(firstx-xmargin),int(0),int(point[0]+xmargin),int(yimg))
+            p11=int(0)#point[1]-ymargin)
+            p12=int(yimg)#point[1]+ymargin)
+            p21=int(firstx-xmargin)#point[0]-xmargin)
+            if xstep==0:
+                xstep=point[0]-firstx
+            p22=int(point[0]+xmargin)
+            if p11 < 0 :
+                p11=0
+            if p21 < 0:
+                p21=0
+            firstx=point[0]
+            imageofnumber.append(imagein[p11:p12,p21:p22])
 
 
     return  imageofnumber
@@ -181,11 +193,12 @@ if __name__ == "__main__":
             charsplited=splitcharacter(imgnew,find_plate)
             for isp in charsplited:
                 win.set_image(isp)
+                time.sleep(3)
                 #dlib.hit_enter_to_continue()
             ####--------------------------------------------
             #myimg = p_image.crop((left,top,right,bottom))
             #myimg.show()
-            win.set_image(imgnew)
+            #win.set_image(imgnew)
             #wins.append(imgnew)
             dlib.hit_enter_to_continue()
         #win.clear_overlay()

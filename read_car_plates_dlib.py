@@ -18,6 +18,7 @@ from skimage.filters import sobel
 def splitcharacter(imagein,find_plate):
     img_arr2=dlib.as_grayscale(imagein)
     img_arr2=dlib.threshold_image(img_arr2)
+    #print(type(imagein))
     #plate_str=find_plate.get_platestr_from_image(img_arr2)
     #print(plate_str)
     #img1=Image.fromarray(img_arr2,'L')
@@ -37,11 +38,58 @@ def splitcharacter(imagein,find_plate):
         time.sleep(0.1)
         #print(rect)
         '''
+    #--------------------------------------------
+    img=255-img_arr2
+    h = img.shape[0]
+    w = img.shape[1]
+
+    print(h,w,"<==")
+    #find blank columns:
+    white_num = []
+    white_max = 0
+    for i in range(w):
+        white = 0
+        for j in range(h):
+            #print(img[j,i])
+            if img[j,i] <127:
+                white += 1
+        white_num.append(white)
+        white_max = max(white_max, white)
+    blank = []
+    print(white_max)
+    for i in range(w):
+        if (white_num[i]  > 0.90 * white_max):
+            blank.append(True)
+        else:
+            blank.append(False)
+
+    #split index:
+    i = 0
+    num = 0
+    l = 0
+    x,y,d = [],[],[]
+    while (i < w):
+        if blank[i]:
+            i += 1
+        else:
+            j = i
+            while (j<w)and(  (not blank[j])or
+                             (j-i<3)  ):
+                j += 1
+            x.append(i)
+            y.append(j)
+            d.append(j-i)
+            l += 1
+            i = j
+    print(l)
+    for k in range(l):
+        print(x[k],y[k])
+    #--------------------------------------------
     #print (type(img_arr2))
     #print(" ")
     #print(img_arr2)
     #img_arr2=sobel(img_arr2)
-    img1=Image.fromarray(img_arr2,'L')
+    img1=Image.fromarray(img_arr2)
     #img1=img1.filter(ImageFilter.CONTOUR)
     #img1=img1.convert('1')
     #img1.show()
@@ -59,11 +107,11 @@ def splitcharacter(imagein,find_plate):
     #print(" ")
     #print(img_arr)
     Data= {'x':[],'y':[]}
-    for y in range(len(img_arr)):
-        for x in range(len(img_arr[0])):
-            if img_arr[y][x]>128:
-                Data['x'].append(x)
-                Data['y'].append(y)
+    for y2 in range(len(img_arr)):
+        for x2 in range(len(img_arr[0])):
+            if img_arr[y2][x2]>128:
+                Data['x'].append(x2)
+                Data['y'].append(y2)
 
     df = DataFrame(Data,columns=['x','y'])
     cluster=9
@@ -74,7 +122,7 @@ def splitcharacter(imagein,find_plate):
     centroids=kmeans.cluster_centers_
 
     #print(len(centroids),centroids)
-    centroids=sorted(centroids,key = lambda x: x[0])
+    centroids=sorted(centroids,key = lambda x2: x2[0])
     #centroids.reverse();
     print(centroids)
     imageofnumber=[]
@@ -85,6 +133,8 @@ def splitcharacter(imagein,find_plate):
     for point in centroids:
         imagefinal.ellipse((point[0]-3,point[1]+int(yimg/3)-2,point[0]+3,point[1]+int(yimg/3)+2),fill=55)
         #imagefinal.rectangle(((point[0]-xmargin,point[1]-ymargin),(point[0]+xmargin,point[1]+ymargin)),outline="black")
+    for k in range(l):
+        imagefinal.rectangle(((x[k],1),(y[k],yimg-1)),outline="green")
     #xwalk=int(ximg-5)/10
     #ywalk=int(yimg-4)
     #xx=xwalk
@@ -113,7 +163,7 @@ def splitcharacter(imagein,find_plate):
             firstx=point[0]
             imageofnumber.append(imagein[p11:p12,p21:p22])
 
-
+    
     return  imageofnumber
 
 if __name__ == "__main__":
@@ -191,10 +241,29 @@ if __name__ == "__main__":
             imgnew=img[top:bottom,left:right]
             ####---------------Find Character---------------
             charsplited=splitcharacter(imgnew,find_plate)
+            cnt=0
             for isp in charsplited:
                 win.set_image(isp)
-                time.sleep(3)
+                imgs=Image.fromarray(isp)
+                imgs.save(str(cnt)+".jpg")
+                cnt+=1
+                #print(find_plate.get_platestr_from_image(isp))
+                #time.sleep(1)
                 #dlib.hit_enter_to_continue()
+            imagess=[]
+            for i in range(cnt):
+                imgss=dlib.load_rgb_image(str(i)+".jpg")
+                imagess.append(imgss)
+            print(find_plate.get_platestr_from_image(imagess))#charsplited))
+            print(find_plate.get_platestr_from_image(charsplited))
+            #for io in range(len(di2)):
+            #    print(di2[io].shape)
+            #    print(charsplited[io].shape)
+            #    if cmp(charsplited[io].reshape(1,-1),di2[io].reshape(1,-1))==0:
+            #    #if cmp([io]==di2[io]:
+            #        print("the same...")
+            #    else:
+            #        print("diff in %d"%io)
             ####--------------------------------------------
             #myimg = p_image.crop((left,top,right,bottom))
             #myimg.show()
@@ -212,4 +281,5 @@ if __name__ == "__main__":
         if len(dets)==0:
             dlib.hit_enter_to_continue()
 
-
+    print("finished.....")
+    dlib.hit_enter_to_continue()

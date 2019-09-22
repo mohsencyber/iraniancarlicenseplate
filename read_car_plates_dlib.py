@@ -39,6 +39,8 @@ def splitcharacter(imagein,find_plate):
         #print(rect)
         '''
     #--------------------------------------------
+    xmargin=ceil(float(lendiff)/8)
+    ymargin=ceil(float(hdiff*9)/2)
     img=255-img_arr2
     h = img.shape[0]
     w = img.shape[1]
@@ -56,9 +58,9 @@ def splitcharacter(imagein,find_plate):
         white_num.append(white)
         white_max = max(white_max, white)
     blank = []
-    print(white_max)
+    print("whitre_max=%d"%white_max)
     for i in range(w):
-        if (white_num[i]  > 0.90 * white_max):
+        if (white_num[i]  > 0.91 * white_max):
             blank.append(True)
         else:
             blank.append(False)
@@ -73,17 +75,85 @@ def splitcharacter(imagein,find_plate):
             i += 1
         else:
             j = i
-            while (j<w)and(  (not blank[j])or
-                             (j-i<3)  ):
+            while (j<w)and((not blank[j])or(j-i<10)):
                 j += 1
             x.append(i)
             y.append(j)
             d.append(j-i)
             l += 1
             i = j
-    print(l)
+    print("len=%d"%l)
+    failbox=[]
+    whitesum=0
     for k in range(l):
-        print(x[k],y[k])
+        for i in range(x[k],y[k]):
+            whitesum += white_num[i]
+        failbox.append((100*whitesum)/(h*(y[k]-x[k])))
+        #if ((100*whitesum)/(h*(y[k]-x[k]))) < 20 :
+        #    failbox.append(True)
+        #else:
+        #    failbox.append(False)
+        whitesum=0
+
+
+    avgdiff=0
+    for k in range(l):
+        print(x[k],y[k],d[k])
+        avgdiff = avgdiff + d[k]
+    avgdiff=round((avgdiff)/l)-xmargin
+    print("*(%d)*"%avgdiff)
+    for k in range(l):
+        if round((d[k]*1.0)/avgdiff)>1 :
+            if k==0:
+                x[k]=x[k]+avgdiff
+            elif k==l-1:
+                y[k]=y[k]-avgdiff
+        if round((d[k]*1.0)/avgdiff)<1 :
+            failbox[k]=2
+        print(x[k],y[k],round((d[k]*1.0)/avgdiff))
+    print(failbox)
+
+    realidx=0
+    while l > 8:
+        for k in range(len(failbox)):
+            if failbox[k] < 25:
+                del x[realidx]
+                del y[realidx]
+                del d[realidx]
+                failbox[k]=-1
+                l= l-1
+            else:
+                realidx+=1
+        k=0
+        lk=len(failbox)
+        while k<lk:
+            if failbox[k]==-1:
+                del failbox[k]
+                lk = lk-1
+            else:
+                k = k+1
+        print(failbox)
+        for ifl in range(8,l):
+            doval = min(failbox)
+            doval_idx= failbox.index(doval)  
+            del x[doval_idx],y[doval_idx],d[doval_idx],failbox[doval_idx]
+            l = l-1
+
+    realidx=0
+    for k in range(len(failbox)):
+        if k >= len(failbox) :
+            break
+        
+        if failbox[k] < 20:
+            del x[realidx]
+            del y[realidx]
+            del d[realidx]
+            del failbox[k]
+            l= l-1
+        else:
+            realidx+=1
+ 
+    print("--------%d---------------------------------"%l)
     #--------------------------------------------
     #print (type(img_arr2))
     #print(" ")
@@ -97,7 +167,7 @@ def splitcharacter(imagein,find_plate):
     img2=dlib.load_rgb_image('tmp.jpg')
     ximg,yimg=img1.size
     print(img1.size,img2.shape)
-    img2=img2[int(yimg/3):2*int(yimg/3),0:ximg]
+    img2=img2[2*int(yimg/4):3*int(yimg/4),0:ximg]
     #img2=np.asarray(img1,dtype='int32')
     #img22=Image.fromarray(img2)
     #img22.show()
@@ -109,12 +179,12 @@ def splitcharacter(imagein,find_plate):
     Data= {'x':[],'y':[]}
     for y2 in range(len(img_arr)):
         for x2 in range(len(img_arr[0])):
-            if img_arr[y2][x2]>128:
+            if img_arr[y2][x2]<128:
                 Data['x'].append(x2)
                 Data['y'].append(y2)
 
     df = DataFrame(Data,columns=['x','y'])
-    cluster=9
+    cluster=10
     try:
         kmeans = KMeans(n_clusters=cluster).fit(df)
     except Exception as e:
@@ -126,12 +196,11 @@ def splitcharacter(imagein,find_plate):
     #centroids.reverse();
     print(centroids)
     imageofnumber=[]
-    xmargin=ceil(float(lendiff)/8)
-    ymargin=ceil(float(hdiff*9)/2)
     print ("==>",xmargin,ymargin)
     imagefinal=ImageDraw.Draw(img1)
-    for point in centroids:
-        imagefinal.ellipse((point[0]-3,point[1]+int(yimg/3)-2,point[0]+3,point[1]+int(yimg/3)+2),fill=55)
+    #for point in centroids:
+        #imagefinal.ellipse((point[0]-int(avgdiff/2),point[1]+int(yimg/3)-2,point[0]+int(avgdiff/2),point[1]+int(yimg/3)+2),fill=55)
+        #imagefinal.rectangle(((point[0]-int(avgdiff/2),0),(point[0]+int(avgdiff/2),yimg-3)),outline="blue")
         #imagefinal.rectangle(((point[0]-xmargin,point[1]-ymargin),(point[0]+xmargin,point[1]+ymargin)),outline="black")
     for k in range(l):
         imagefinal.rectangle(((x[k],1),(y[k],yimg-1)),outline="green")
@@ -145,25 +214,36 @@ def splitcharacter(imagein,find_plate):
     img1.show() 
     firstx=0
     xstep=0
+    """
     for point in centroids:
         if firstx==0:
-            firstx=point[0]
+            firstx=point[0]-int(avgdiff/2)
         else:
-            print(int(firstx-xmargin),int(0),int(point[0]+xmargin),int(yimg))
+            #print(int(firstx-xmargin),int(0),int(point[0]+xmargin),int(yimg))
+            print(int(firstx-avgdiff/2),int(0),int(point[0]+avgdiff/2),int(yimg))
             p11=int(0)#point[1]-ymargin)
             p12=int(yimg)#point[1]+ymargin)
-            p21=int(firstx-xmargin)#point[0]-xmargin)
+            #p21=int(firstx-xmargin)#point[0]-xmargin)
+            p21=int(firstx-avgdiff/2)#point[0]-xmargin)
             if xstep==0:
                 xstep=point[0]-firstx
-            p22=int(point[0]+xmargin)
+            p22=int(point[0]+avgdiff/2)
             if p11 < 0 :
                 p11=0
             if p21 < 0:
                 p21=0
-            firstx=point[0]
+            firstx=point[0]-int(avgdiff/2)
             imageofnumber.append(imagein[p11:p12,p21:p22])
 
-    
+    """ 
+    for i in range(l):
+        print(x[i],y[i])
+        if x[i]==0 :
+            x[i]=3
+        if y[i]>w-2 :
+            y[i]=w-2
+
+        imageofnumber.append(imagein[0:int(yimg),int(x[i]-2):int(y[i])+2])
     return  imageofnumber
 
 if __name__ == "__main__":

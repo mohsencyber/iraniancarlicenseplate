@@ -99,9 +99,9 @@ def splitcharacter(imagein,find_plate):
     avgdiff=0
     for k in range(l):
         print(x[k],y[k],d[k])
-        if k==0 or d[k]-avgdiff<(avgdiff/xmargin):
+        if k==0 or (d[k]/avgdiff)<1 :#/xmargin):
             avgdiff=d[k]
-
+    avgdiff=avgdiff+xmargin
     """
     for k in range(l):
         if k==0 :
@@ -174,7 +174,7 @@ def splitcharacter(imagein,find_plate):
                 yn=y[k]
                 y[k]=x[k]+avgdiff
                 if k==5:
-                    xn=x[k]+avgdiff+xmargin*3
+                    xn=x[k]+avgdiff+xmargin*2.5
                 else:
                     xn=x[k]+avgdiff+xmargin
                 #k=k+1

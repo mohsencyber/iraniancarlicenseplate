@@ -60,7 +60,7 @@ def splitcharacter(imagein,find_plate):
     blank = []
     print("whitre_max=%d"%white_max)
     for i in range(w):
-        if (white_num[i]  > 0.91 * white_max):
+        if (white_num[i]  > 0.90 * white_max):
             blank.append(True)
         else:
             blank.append(False)
@@ -99,11 +99,22 @@ def splitcharacter(imagein,find_plate):
     avgdiff=0
     for k in range(l):
         print(x[k],y[k],d[k])
-        avgdiff = avgdiff + d[k]
+        if k==0 or d[k]-avgdiff<(avgdiff/xmargin):
+            avgdiff=d[k]
+
+    """
+    for k in range(l):
+        if k==0 :
+            print(x[k],y[k],d[k])
+        else:
+            print(x[k],y[k],d[k],round(d[k]/(avgdiff/(k+1))))
+        if k==0 or round(d[k]/(avgdiff/(k+1)))>1:
+            avgdiff = avgdiff + d[k]
     avgdiff=round((avgdiff)/l)-xmargin
+    """
     print("*(%d)*"%avgdiff)
     for k in range(l):
-        if round((d[k]*1.0)/avgdiff)>1 :
+        if round((d[k]*1.0)/avgdiff)>1 and l>=8:
             if k==0:
                 x[k]=x[k]+avgdiff
             elif k==l-1:
@@ -153,6 +164,27 @@ def splitcharacter(imagein,find_plate):
         else:
             realidx+=1
  
+    if l< 8:
+        k=0
+        while k<l:
+            print(k,d[k]/avgdiff)
+            if d[k]/avgdiff>1.80:
+                dn=d[k]-avgdiff
+                d[k]=avgdiff
+                yn=y[k]
+                y[k]=x[k]+avgdiff
+                if k==5:
+                    xn=x[k]+avgdiff+xmargin*3
+                else:
+                    xn=x[k]+avgdiff+xmargin
+                #k=k+1
+                x.insert(k+1,xn)
+                y.insert(k+1,yn)
+                d.insert(k+1,dn)
+                l=l+1
+                if l==8:
+                    break
+            k=k+1
     print("--------%d---------------------------------"%l)
     #--------------------------------------------
     #print (type(img_arr2))
@@ -238,11 +270,11 @@ def splitcharacter(imagein,find_plate):
     """ 
     for i in range(l):
         print(x[i],y[i])
-        if x[i]==0 :
+        if x[i]<3 :
             x[i]=3
         if y[i]>w-2 :
             y[i]=w-2
-
+        
         imageofnumber.append(imagein[0:int(yimg),int(x[i]-2):int(y[i])+2])
     return  imageofnumber
 
@@ -252,9 +284,11 @@ if __name__ == "__main__":
             "Give the path to the car plates directory as the argument to this "
             "program."
             "execute this program by running:\n"
-            "    ./read_car_plates_dlib.py car_plate/")
-        exit()
-    plate_folder = sys.argv[1]
+            "    ./read_car_plates_dlib.py car_plates/")
+        plate_folder = "car_plates/"
+        #exit()
+    else:
+        plate_folder = sys.argv[1]
     
     find_plate = findplate()
     options = dlib.simple_object_detector_training_options()
@@ -290,7 +324,13 @@ if __name__ == "__main__":
     win = dlib.image_window()
     global lendiff , hdiff
     #wins=[]
-    for f in glob.glob(os.path.join(plate_folder, "*.jpg")):
+    file_list=[]
+    if  plate_folder.find(".jpg",-4)>-1 :
+        file_list.append(plate_folder)
+    else:
+        file_list=glob.glob(os.path.join(plate_folder, "*.jpg"))
+
+    for f in file_list:#glob.glob(os.path.join(plate_folder, "*.jpg")):
         print("Processing file: {}".format(f))
         img = dlib.load_rgb_image(f)
         #print (img)
@@ -324,6 +364,7 @@ if __name__ == "__main__":
             cnt=0
             for isp in charsplited:
                 win.set_image(isp)
+                #print(isp)
                 imgs=Image.fromarray(isp)
                 imgs.save(str(cnt)+".jpg")
                 cnt+=1
@@ -335,7 +376,7 @@ if __name__ == "__main__":
                 imgss=dlib.load_rgb_image(str(i)+".jpg")
                 imagess.append(imgss)
             print(find_plate.get_platestr_from_image(imagess))#charsplited))
-            print(find_plate.get_platestr_from_image(charsplited))
+            #print(find_plate.get_platestr_from_image(charsplited))
             #for io in range(len(di2)):
             #    print(di2[io].shape)
             #    print(charsplited[io].shape)

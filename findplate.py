@@ -25,7 +25,7 @@ class findplate:
         for train_img in train_imgs:
             #print(train_img)
             img_label=train_img.split('.')[0]
-            img_label=img_label[:-1]
+            img_label=img_label[:-2]
             #if not img_label.isdigit():
             #    continue
             img_label=img_label.rjust(3,' ')

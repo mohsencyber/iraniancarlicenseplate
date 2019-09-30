@@ -96,12 +96,16 @@ def splitcharacter(imagein,find_plate):
         whitesum=0
 
 
+    avgdiff2=round(w/8)
     avgdiff=0
+    sumavg=1
     for k in range(l):
-        print(x[k],y[k],d[k])
-        if k==0 or (d[k]/avgdiff)<1 :#/xmargin):
-            avgdiff=d[k]
-    avgdiff=avgdiff+xmargin
+        print(x[k],y[k],d[k],avgdiff,sumavg)
+        if (d[k]/avgdiff2)<1: #xmargin):
+            avgdiff=avgdiff+d[k]
+            avgdiff2=d[k]
+            sumavg=sumavg+1
+    avgdiff=round(avgdiff/sumavg) +2*xmargin
     """
     for k in range(l):
         if k==0 :
@@ -119,9 +123,13 @@ def splitcharacter(imagein,find_plate):
                 x[k]=x[k]+avgdiff
             elif k==l-1:
                 y[k]=y[k]-avgdiff
+                if y[k]-x[k]< avgdiff :
+                    y[k]=x[k]+avgdiff+xmargin
         if round((d[k]*1.0)/avgdiff)<1 :
             failbox[k]=2
         print(x[k],y[k],round((d[k]*1.0)/avgdiff))
+        #if y[k]-x[k]< avgdiff :
+        #    y[k]=x[k]+avgdiff
     print(failbox)
 
     realidx=0
@@ -167,20 +175,28 @@ def splitcharacter(imagein,find_plate):
     if l< 8:
         k=0
         while k<l:
-            print(k,d[k]/avgdiff)
+            print(k,d[k]/avgdiff,x[k],y[k],d[k])
             if d[k]/avgdiff>1.80:
                 dn=d[k]-avgdiff
                 d[k]=avgdiff
                 yn=y[k]
                 y[k]=x[k]+avgdiff
                 if k==5:
-                    xn=x[k]+avgdiff+xmargin*2.5
+                    xn=x[k]+avgdiff+xmargin*3
+                elif k==2:
+                    d[k]=avgdiff*2;
+                    y[k]=x[k]+2*avgdiff
+                    xn=x[k]+avgdiff*2-xmargin
                 else:
                     xn=x[k]+avgdiff+xmargin
                 #k=k+1
+                if yn<= xn :
+                    k=k+1
+                    continue
                 x.insert(k+1,xn)
                 y.insert(k+1,yn)
                 d.insert(k+1,dn)
+                print(xn,yn,dn)
                 l=l+1
                 if l==8:
                     break

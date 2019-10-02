@@ -97,15 +97,24 @@ def splitcharacter(imagein,find_plate):
 
 
     avgdiff2=round(w/8)
-    avgdiff=0
+    avgdiff=0#avgdiff2
     sumavg=1
+    #for k in range(l):
+    #    print(x[k],y[k],d[k],avgdiff,sumavg)
+    #    avgdiff=(avgdiff+d[k])/2
+    #avgdiff2=avgdiff
+    #avgdiff=0
+    #print(avgdiff2)
     for k in range(l):
-        print(x[k],y[k],d[k],avgdiff,sumavg)
-        if (d[k]/avgdiff2)<1: #xmargin):
-            avgdiff=avgdiff+d[k]
-            avgdiff2=d[k]
-            sumavg=sumavg+1
-    avgdiff=round(avgdiff/sumavg) +2*xmargin
+        print(x[k],y[k],d[k],avgdiff,d[k]/avgdiff2)
+        if d[k]/avgdiff2 < 1:
+            avgdiff=(avgdiff+d[k]*1.0)/2
+        #if ((d[k]*1.0)/avgdiff2)<1.8: #xmargin):
+        #    avgdiff=avgdiff+d[k]
+        #    avgdiff2=d[k]
+        #    sumavg=sumavg+1
+    #avgdiff=round(avgdiff/sumavg) +2*xmargin
+    avgdiff=avgdiff + xmargin
     """
     for k in range(l):
         if k==0 :
@@ -135,7 +144,7 @@ def splitcharacter(imagein,find_plate):
     realidx=0
     while l > 8:
         for k in range(len(failbox)):
-            if failbox[k] < 25:
+            if failbox[k] < 35:
                 del x[realidx]
                 del y[realidx]
                 del d[realidx]
@@ -182,7 +191,7 @@ def splitcharacter(imagein,find_plate):
                 yn=y[k]
                 y[k]=x[k]+avgdiff
                 if k==5:
-                    xn=x[k]+avgdiff+xmargin*3
+                    xn=x[k]+avgdiff+xmargin
                 elif k==2:
                     d[k]=avgdiff*2;
                     y[k]=x[k]+2*avgdiff

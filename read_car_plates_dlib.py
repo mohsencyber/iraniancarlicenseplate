@@ -58,10 +58,13 @@ def splitcharacter(imagein,find_plate):
         white_num.append(white)
         white_max = max(white_max, white)
     blank = []
-    print("whitre_max=%d"%white_max)
+    print("whitre_max=%d,%f"%(white_max,0.895*white_max))
     for i in range(w):
-        if (white_num[i]  > 0.90 * white_max):
+        #print(white_num[i])
+        if (white_num[i]  > 0.895 * white_max):
             blank.append(True)
+            #print('*')
+            #time.sleep(1)
         else:
             blank.append(False)
 
@@ -85,16 +88,6 @@ def splitcharacter(imagein,find_plate):
     print("len=%d"%l)
     failbox=[]
     whitesum=0
-    for k in range(l):
-        for i in range(x[k],y[k]):
-            whitesum += white_num[i]
-        failbox.append((100*whitesum)/(h*(y[k]-x[k])))
-        #if ((100*whitesum)/(h*(y[k]-x[k]))) < 20 :
-        #    failbox.append(True)
-        #else:
-        #    failbox.append(False)
-        whitesum=0
-
 
     avgdiff2=round(w/8)
     avgdiff=0#avgdiff2
@@ -115,6 +108,9 @@ def splitcharacter(imagein,find_plate):
         #    sumavg=sumavg+1
     #avgdiff=round(avgdiff/sumavg) +2*xmargin
     avgdiff=avgdiff + xmargin
+    if l<=4:
+        
+        avgdiff = round((w-10*xmargin)/8)
     """
     for k in range(l):
         if k==0 :
@@ -126,6 +122,50 @@ def splitcharacter(imagein,find_plate):
     avgdiff=round((avgdiff)/l)-xmargin
     """
     print("*(%d)*"%avgdiff)
+    if l< 8:
+        k=0
+        while k<l:
+            print(k,d[k]/avgdiff,x[k],y[k],d[k])
+            if (d[k]*1.0)/avgdiff>1.80:
+                dn=d[k]-avgdiff
+                d[k]=avgdiff
+                yn=y[k]
+                if k==6:
+                    x[k]=x[k]+xmargin
+                    xn=x[k]+avgdiff+xmargin*1
+                    y[k]=x[k]+avgdiff
+                elif k==2:
+                    d[k]=avgdiff*2;
+                    y[k]=x[k]+2*avgdiff+xmargin
+                    xn=x[k]+avgdiff*2+xmargin*2
+                else:
+                    xn=x[k]+avgdiff+xmargin
+                    y[k]=x[k]+avgdiff
+                #k=k+1
+                if yn<= xn :
+                    k=k+1
+                    continue
+                x.insert(k+1,xn)
+                y.insert(k+1,yn)
+                d.insert(k+1,dn)
+                print(k,x[k],y[k],d[k])
+                print(xn,yn,dn)
+                l=l+1
+                if l==8:
+                    break
+            k=k+1
+
+    for k in range(l):
+        for i in range(int(x[k]),int(y[k])):
+            whitesum += white_num[i]
+        failbox.append((100*whitesum)/(h*(int(y[k])-int(x[k]))))
+        #if ((100*whitesum)/(h*(y[k]-x[k]))) < 20 :
+        #    failbox.append(True)
+        #else:
+        #    failbox.append(False)
+        whitesum=0
+
+
     for k in range(l):
         if round((d[k]*1.0)/avgdiff)>1 and l>=8:
             if k==0:
@@ -140,11 +180,11 @@ def splitcharacter(imagein,find_plate):
         #if y[k]-x[k]< avgdiff :
         #    y[k]=x[k]+avgdiff
     print(failbox)
-
+    print("<===============>")
     realidx=0
     while l > 8:
         for k in range(len(failbox)):
-            if failbox[k] < 35:
+            if failbox[k] < 33:
                 del x[realidx]
                 del y[realidx]
                 del d[realidx]
@@ -185,19 +225,21 @@ def splitcharacter(imagein,find_plate):
         k=0
         while k<l:
             print(k,d[k]/avgdiff,x[k],y[k],d[k])
-            if d[k]/avgdiff>1.80:
+            if (d[k]*1.0)/avgdiff>1.80:
                 dn=d[k]-avgdiff
                 d[k]=avgdiff
                 yn=y[k]
-                y[k]=x[k]+avgdiff
-                if k==5:
-                    xn=x[k]+avgdiff+xmargin
+                if k==6:
+                    x[k]=x[k]+xmargin
+                    xn=x[k]+avgdiff+xmargin*1
+                    y[k]=x[k]+avgdiff
                 elif k==2:
                     d[k]=avgdiff*2;
-                    y[k]=x[k]+2*avgdiff
-                    xn=x[k]+avgdiff*2-xmargin
+                    y[k]=x[k]+2*avgdiff+xmargin
+                    xn=x[k]+avgdiff*2+xmargin*2
                 else:
                     xn=x[k]+avgdiff+xmargin
+                    y[k]=x[k]+avgdiff
                 #k=k+1
                 if yn<= xn :
                     k=k+1
@@ -205,6 +247,7 @@ def splitcharacter(imagein,find_plate):
                 x.insert(k+1,xn)
                 y.insert(k+1,yn)
                 d.insert(k+1,dn)
+                print(k,x[k],y[k],d[k])
                 print(xn,yn,dn)
                 l=l+1
                 if l==8:

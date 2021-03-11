@@ -288,7 +288,7 @@ def splitcharacter(imagein,find_plate):
     try:
         kmeans = KMeans(n_clusters=cluster).fit(df)
     except Exception as e:
-        return Null
+        return None
     centroids=kmeans.cluster_centers_
 
     #print(len(centroids),centroids)
